@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="onboard" class="screen" style="display: block;">
+  <img class="biglogo" id="lg1" alt="Starssenger Logo">
+  <p class="tag" style="text-align:center">
+    Mensajería cifrada extremo a extremo. La clave sale de los números — no viaja. Solo viaja el mensaje cifrado.
+  </p>
+
+  <form method="POST" action="{% url 'onboard' %}">
+    {% csrf_token %}
+    <label for="me">Tu número / DNI (con código de país)</label>
+    <input id="me" name="dni" inputmode="numeric" placeholder="5491137824591" required>
+
+    <label for="meName">Tu nombre (así te ven los demás)</label>
+    <input id="meName" name="nombre" placeholder="Tu nombre" required>
+
+    <label>Seguridad</label>
+    <div class="seg">
+      <button type="button" id="sOff" class="act" onclick="setSec(0)">🔓 Normal</button>
+      <button type="button" id="sOn" onclick="setSec(1)">🛡️ Blindado</button>
+    </div>
+    <input type="hidden" id="secureMode" name="is_shielded" value="0">
+
+    <p class="tag">
+      🛡️ Blindado: los mensajes se borran solos a los 45s y no se guardan en el teléfono. (Tus contactos sí se guardan.) Menos rastro para un spyware.
+    </p>
+
+    <button type="submit" class="btn" style="margin-top:18px">Entrar</button>
+  </form>
+  
+  <p class="tag" id="oerr" style="color:#e28">
+    {% if error %}{{ error }}{% endif %}
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function setSec(val) {
+    document.getElementById('secureMode').value = val;
+    document.getElementById('sOff').classList.toggle('act', val === 0);
+    document.getElementById('sOn').classList.toggle('act', val === 1);
+  }
+</script>
+{% endblock %}

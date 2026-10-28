@@ -2,103 +2,55 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SuperTano{% endblock %}</title>
-
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="{% static 'estilos.css' %}?v=123">
-
-    {% block extra_head %}{% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starssenger</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
+  <div class="wrap">
+    {% block content %}{% endblock %}
+  </div>
 
-<!-- La barra solo se muestra si está autenticado Y ADEMÁS ya eligió una sucursal -->
-{% if user.is_authenticated and request.session.sucursal_id %}
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="{% url 'inicio' %}" class="nav-brand">
-            <span class="nav-icon">🛒</span>
-            <span class="nav-title">SuperTano</span>
-        </a>
+  <!-- Carga de Scripts JS de Starssenger -->
+  <script src="{% static 'js/00-logo.js' %}"></script>
+  <script src="{% static 'js/01-protocolo-keystream.js' %}"></script>
+  <script src="{% static 'js/02-protocolo-x25519.js' %}"></script>
+  <script src="{% static 'js/03-estado.js' %}"></script>
+  <script src="{% static 'js/04-helpers.js' %}"></script>
 
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="{% url 'acerca' %}" class="nav-link">
-                    <span class="link-icon">❓</span>
-                    <span>¿Quién soy?</span>
-                </a>
-            </li>
+  <script>
+    // Inyección de variables globales desde Django hacia JS
+    const LOGO = "data:image/svg+xml;base64,..."; // Definido en 00-logo.js o inyectado aquí
+    const DJANGO_USER = {
+      isAuth: {{ user.is_authenticated|yesno:"true,false" }},
+      phone: "{{ request.user.usuario.dni|default:'' }}",
+      name: "{{ request.user.usuario.nombre|default:'' }}"
+    };
 
-            <li class="nav-item">
-                <a href="{% url 'lista_usuarios' %}" class="nav-link">
-                    <span class="link-icon">🧑</span>
-                    <span>Lista de usuarios</span>
-                </a>
-            </li>
+    // Inicialización al cargar el DOM (Equivalente al boot() original)
+    document.addEventListener("DOMContentLoaded", function() {
+      // Seteo de logos en cabeceras presentes
+      const lg1 = document.getElementById('lg1');
+      const lg2 = document.getElementById('lg2');
+      if (lg1) lg1.src = LOGO;
+      if (lg2) lg2.src = LOGO;
 
-            <li class="nav-item">
-                <a href="{% url 'lista_productos' %}" class="nav-link">
-                    <span class="link-icon">🛍️</span> 
-                    <span>Productos</span>
-                </a>
-            </li>
+      {% if user.is_authenticated %}
+        // Usuario autenticado: reconstruir conversaciones e iniciar red MQTT/WebSocket
+        if (typeof rebuildConvs === 'function') rebuildConvs();
+        if (typeof startNet === 'function' && !window.client) {
+          startNet();
+        } else if (window.client && window.topicMap) {
+          Object.keys(topicMap).forEach(t => client.subscribe(t));
+        }
+        if (typeof renderList === 'function') renderList();
+        if (typeof processAddLink === 'function') processAddLink();
+      {% endif %}
+    });
+  </script>
 
-            <!-- PÁGINA: ESTADÍSTICAS -->
-            <li class="nav-item">
-                <a href="{% url 'ranking_productos' %}" class="nav-link">
-                    <span class="link-icon">📊</span> 
-                    <span>Estadísticas</span>
-                </a>
-            </li>
-
-            <!-- 🌟 NUEVO ELEMENTO: CAMBIAR CONTRASEÑA -->
-            <li class="nav-item">
-                <a href="{% url 'cambiar_contrasenia' %}" class="nav-link">
-                    <span class="link-icon">🔐</span> 
-                    <span>Cambiar Clave</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <span class="user-info">
-                    <span class="link-icon">👤</span>
-                    <span>{{ user.username }}</span>
-                </span>
-            </li>
-
-            <li class="nav-item">
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link logout-button" style="background: none; border: none; cursor: pointer; font: inherit;">
-                        <span class="link-icon">🔒</span>
-                        <span>Cerrar sesión</span>
-                    </button>
-                </form>
-            </li>
-        </ul>
-    </div>
-</nav>
-{% endif %}
-
-<div class="main-content">
-    <!-- CONTENEDOR AGREGADO: Alerta verde de éxito proveniente de la instancia del Singleton -->
-    {% if mensaje_exito_singleton %}
-      <div style="max-width: 900px; margin: 20px auto; padding: 15px 20px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        ✅ <span>{{ mensaje_exito_singleton }}</span>
-      </div>
-    {% endif %}
-
-    {% block content %}
-    {% endblock %}
-</div>
-
-<footer class="site-footer">
-    <p>&copy; {% now "Y" %} SuperTano. Todos los derechos reservados.</p>
-</footer>
-
-{% block scripts %}
-{% endblock %}
-
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

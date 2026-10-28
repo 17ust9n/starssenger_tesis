@@ -1,0 +1,56 @@
+<!-- MODAL: Contacto -->
+<div id="mContact" class="modal">
+  <div class="card">
+    <h3 id="cTitle">Nuevo contacto</h3>
+    <label for="cName">Nombre</label>
+    <input id="cName" placeholder="Marito">
+    <label for="cNum">Número (con código de país)</label>
+    <input id="cNum" inputmode="numeric" placeholder="5491145289012">
+    <button class="btn ghost" id="cImport" style="margin-top:12px;display:none" onclick="importContact()">📇 Importar de mis contactos</button>
+    <div class="mrow">
+      <button class="btn ghost" onclick="closeModal('mContact')">Cancelar</button>
+      <button class="btn" onclick="saveContact()">Guardar</button>
+    </div>
+    <button class="btn ghost" id="cDel" style="display:none;margin-top:10px;width:100%;color:#e28;border-color:#e28" onclick="deleteContact()">🗑️ Borrar este contacto</button>
+    <p class="tag" id="cErr" style="color:#e28"></p>
+  </div>
+</div>
+
+<!-- MODAL: Nuevo Grupo -->
+<div id="mGroup" class="modal">
+  <div class="card">
+    <h3>Nuevo grupo</h3>
+    <label for="gName">Nombre del grupo</label>
+    <input id="gName" placeholder="Nombre (opcional)">
+    <label>Miembros</label>
+    <div class="picklist" id="gPick"></div>
+    <div class="mrow">
+      <button class="btn ghost" onclick="closeModal('mGroup')">Cancelar</button>
+      <button class="btn" onclick="saveGroup()">Crear</button>
+    </div>
+    <p class="tag" id="gErr" style="color:#e28"></p>
+  </div>
+</div>
+
+<!-- MODAL: Info Chat -->
+<div id="mInfo" class="modal">
+  <div class="card">
+    <div style="text-align:center">
+      <div class="av" id="iAv" style="margin:0 auto 8px;width:66px;height:66px;font-size:26px"></div>
+      <h3 id="iName" style="margin:0"></h3>
+      <p class="tag" id="iNum" style="margin:4px 0 0"></p>
+    </div>
+    <div id="iMembers"></div>
+    <div class="mrow" style="margin-top:14px">
+      <button class="btn" id="iVideo" onclick="infoVideo()">📹 Videollamada</button>
+      <button class="btn ghost" id="iVoice" onclick="infoVoice()">📞 Llamar</button>
+    </div>
+    <div class="mrow" id="iEditRow" style="margin-top:8px">
+      <button class="btn ghost" onclick="infoEdit()">✎ Editar</button>
+      <button class="btn ghost" style="color:#e28;border-color:#e28" onclick="infoDelete()">🗑️ Borrar</button>
+    </div>
+    <div class="mrow" style="margin-top:10px">
+      <button class="btn ghost" style="width:100%" onclick="closeModal('mInfo')">Cerrar</button>
+    </div>
+  </div>
+</div>

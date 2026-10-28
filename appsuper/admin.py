@@ -1,23 +1,39 @@
 from django.contrib import admin
-from .models import Supermercado, Sucursal, Jefe, Empleado, Pasillo, Producto, Cliente, Venta
+from .models import (Plataforma, Nodo, Administrador, Moderador, Canal, Mensaje, Usuario, EnvioMensaje)
 
-@admin.register(Producto)
-class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('id_producto', 'nombre', 'peso', 'stock', 'categoria', 'costo')
-    # Al ser "categoria" un String/CharField, ahora SÍ podés buscar por él sin errores
-    search_fields = ('nombre', 'id_producto', 'categoria')
-    list_filter = ('categoria',)
+@admin.register(Mensaje)
+class MensajeAdmin(admin.ModelAdmin):
+    list_display = ('id_mensaje', 'nodo_id', 'texto', 'remitente', 'categoria', 'peso', 'stock', 'costo')
+    list_filter = ('categoria', 'nodo_id')
+    search_fields = ('texto', 'remitente', 'categoria')
 
-@admin.register(Venta)
-class VentaAdmin(admin.ModelAdmin):
-    list_display = ('id_venta', 'fecha', 'producto', 'cliente', 'empleado', 'cant_cuotas')
-    list_filter = ('fecha', 'cant_cuotas')
-    search_fields = ('id_venta', 'cliente__id_cliente', 'empleado__id_empleado')
 
-# Registro simple para los demás modelos del diagrama
-admin.site.register(Supermercado)
-admin.site.register(Sucursal)
-admin.site.register(Jefe)
-admin.site.register(Empleado)
-admin.site.register(Pasillo)
-admin.site.register(Cliente)
+@admin.register(EnvioMensaje)
+class EnvioMensajeAdmin(admin.ModelAdmin):
+    list_display = ('id_envio', 'fecha', 'mensaje', 'usuario', 'moderador', 'metodo_envio', 'cant_cuotas')
+    list_filter = ('fecha', 'metodo_envio', 'cant_cuotas')
+    search_fields = ('usuario__nombre', 'usuario__dni', 'moderador__nombre', 'moderador__dni')
+
+
+@admin.register(Nodo)
+class NodoAdmin(admin.ModelAdmin):
+    list_display = ('id_nodo', 'nombre', 'localidad', 'plataforma')
+    search_fields = ('nombre', 'localidad')
+
+
+@admin.register(Usuario)
+class UsuarioAdmin(admin.ModelAdmin):
+    list_display = ('id_usuario', 'nombre', 'dni', 'edad', 'dinero')
+    search_fields = ('nombre', 'dni')
+
+
+@admin.register(Moderador)
+class ModeradorAdmin(admin.ModelAdmin):
+    list_display = ('id_moderador', 'nombre', 'dni', 'nodo', 'sueldo')
+    search_fields = ('nombre', 'dni')
+
+
+# Registro simple para el resto de los modelos
+admin.site.register(Plataforma)
+admin.site.register(Administrador)
+admin.site.register(Canal)

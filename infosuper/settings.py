@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'appsuper',
+    'appseminario',
 ]
 
 MIDDLEWARE = [
@@ -50,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'infosuper.urls'
+ROOT_URLCONF = 'infoseminario.urls'
 
 TEMPLATES = [
     {
@@ -64,13 +64,13 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
-                'appsuper.context_processors.sucursal_context',
+                'appseminario.context_processors.sucursal_context',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'infosuper.wsgi.application'
+WSGI_APPLICATION = 'infoseminario.wsgi.application'
 
 
 # Database

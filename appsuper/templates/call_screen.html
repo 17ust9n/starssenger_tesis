@@ -1,0 +1,37 @@
+<!-- PANTALLA DE LLAMADA (Voz o Video) -->
+<div id="call" style="display:none;">
+  <div id="grid"></div>
+  
+  <div id="voiceface" style="display:none;">
+    <div class="vfav" id="vfAv"></div>
+    <div id="vfName"></div>
+    <div id="vfState"></div>
+  </div>
+  
+  <div id="audios" style="display:none;"></div>
+  <div id="callkeys"></div>
+  
+  <button id="addcall" onclick="openInvite()" title="Sumar a la llamada" aria-label="Sumar a la llamada">＋</button>
+  <button id="hang" onclick="hangup()">Colgar</button>
+</div>
+
+<!-- BANNER DE LLAMADA ENTRANTE -->
+<div id="incall" style="display:none;">
+  📹 <b id="icName"></b>
+  <span class="sp"></span>
+  <button class="dec" onclick="declineCall()">Rechazar</button>
+  <button class="acc" onclick="answerCall()">Contestar</button>
+</div>
+
+<!-- MODAL: Invitar a la llamada -->
+<div id="mInvite" class="modal">
+  <div class="card">
+    <h3>Sumar a la llamada</h3>
+    <p class="tag">Elegí a quién invitar. Le va a sonar y, si atiende, se suma.</p>
+    <div class="picklist" id="iPick"></div>
+    <div class="mrow">
+      <button class="btn ghost" onclick="closeModal('mInvite')">Cancelar</button>
+      <button class="btn" onclick="doInvite()">Invitar</button>
+    </div>
+  </div>
+</div>

@@ -1,113 +1,117 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 
-class Supermercado(models.Model):
+class Plataforma(models.Model):
     ano_fundacion = models.IntegerField()
-    cant_sucursales = models.IntegerField()
+    cant_nodos = models.IntegerField()
     pais = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"Supermercado {self.pais}"
+        return f"Plataforma {self.pais}"
 
-class Sucursal(models.Model):
-    supermercado = models.ForeignKey(Supermercado, on_delete=models.CASCADE, related_name='sucursales')
-    nombre = models.CharField(max_length=150, default="Sin Nombre")
-    domicilio = models.CharField(max_length=200, default="Sin Domicilio")
+
+class Nodo(models.Model):
+    plataforma = models.ForeignKey(Plataforma, on_delete=models.CASCADE, related_name='nodos')
+    nombre = models.CharField(max_length=150, default="Nodo Principal")
+    domicilio = models.CharField(max_length=200, default="Servidor Central")
     localidad = models.CharField(max_length=150)
-    id_sucursal = models.IntegerField(unique=True)
+    id_nodo = models.IntegerField(unique=True)
 
     def __str__(self):
-        return f"{self.nombre} - {self.domicilio} ({self.id_sucursal})"
+        # Corregido: String en una sola línea con salto explícito \n
+        return f"{self.nombre}\n{self.localidad} ({self.id_nodo})"
 
-class Jefe(models.Model):
-    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='jefes')
+
+class Administrador(models.Model):
+    nodo = models.ForeignKey(Nodo, on_delete=models.CASCADE, related_name='administradores')
     edad = models.IntegerField()
     anos_servicio = models.IntegerField()
     dni = models.IntegerField(unique=True)
 
     def __str__(self):
-        return f"Jefe DNI: {self.dni}"
+        return f"Administrador DNI: {self.dni}"
 
-class Empleado(models.Model):
-    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='empleados')
+
+class Moderador(models.Model):
+    nodo = models.ForeignKey(Nodo, on_delete=models.CASCADE, related_name='moderadores')
     nombre = models.CharField(max_length=150, default="Sin Nombre")
     sexo = models.CharField(max_length=10, default="hombre") 
     edad = models.IntegerField()
     anos_servicio = models.IntegerField()
     dni = models.IntegerField(unique=True)
-    id_empleado = models.IntegerField(unique=True)
+    id_moderador = models.IntegerField(unique=True)
     sueldo = models.FloatField()
 
     def __str__(self):
-        return f"{self.nombre} (ID: {self.id_empleado})"
+        return f"{self.nombre} (ID: {self.id_moderador})"
 
-class Pasillo(models.Model):
-    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='pasillos')
-    id_pasillo = models.IntegerField(unique=True)
+
+class Canal(models.Model):
+    nodo = models.ForeignKey(Nodo, on_delete=models.CASCADE, related_name='canales')
+    id_canal = models.IntegerField(unique=True)
 
     def __str__(self):
-        return f"Pasillo {self.id_pasillo}"
+        return f"Canal {self.id_canal}"
 
-class Producto(models.Model):
-    pasillo = models.ForeignKey('Pasillo', on_delete=models.SET_NULL, null=True, blank=True, related_name='productos')
-    id_producto = models.IntegerField()
-    sucursal_id = models.IntegerField(default=1) 
-    nombre = models.CharField(max_length=150)
-    empresa = models.CharField(max_length=150)
-    peso = models.FloatField(validators=[MinValueValidator(0.0)])
-    stock = models.IntegerField(validators=[MinValueValidator(1)])
-    categoria = models.CharField(max_length=100)
+
+class Mensaje(models.Model):
+    canal = models.ForeignKey('Canal', on_delete=models.SET_NULL, null=True, blank=True, related_name='mensajes')
+    id_mensaje = models.IntegerField()
+    nodo_id = models.IntegerField(default=1) 
+    texto = models.CharField(max_length=150)
+    remitente = models.CharField(max_length=150)
+    peso = models.FloatField(validators=[MinValueValidator(0.0)])  # Tamaño en KB
+    stock = models.IntegerField(validators=[MinValueValidator(1)])  # Intentos/TTL
+    categoria = models.CharField(max_length=100)                    # Cifrado, Multimedia, etc.
     costo = models.FloatField()
-    imagen = models.ImageField(upload_to='productos/', null=True, blank=True)
+    imagen = models.ImageField(upload_to='mensajes/', null=True, blank=True)
 
-    # Conservamos solo el campo estructural para poder armar los combos
-    combo_padre = models.ForeignKey(
+    mensaje_padre = models.ForeignKey(
         'self', 
         on_delete=models.CASCADE, 
         null=True, 
         blank=True, 
-        related_name='subproductos'
+        related_name='respuestas'
     )
 
     class Meta:
-        unique_together = ('id_producto', 'sucursal_id') 
+        unique_together = ('id_mensaje', 'nodo_id') 
 
     def __str__(self):
-        return f"{self.nombre} (Sucursal: {self.sucursal_id})"
+        return f"{self.texto} (Nodo: {self.nodo_id})"
 
 
-class Cliente(models.Model):
+class Usuario(models.Model):
     nombre = models.CharField(max_length=150, default="Sin Nombre")
     sexo = models.CharField(max_length=10, default="hombre") 
     edad = models.IntegerField()
     dni = models.IntegerField(unique=True)
-    id_cliente = models.IntegerField(unique=True)
-    dinero = models.FloatField()
+    id_usuario = models.IntegerField(unique=True)
+    dinero = models.FloatField()  # Crédito/saldo
 
     def __str__(self):
         return self.nombre
 
 
-class Venta(models.Model):
-    METODOS_PAGO_CHOICES = [
-        ('contado', 'Al contado'),
-        ('efectivo', 'Efectivo'),  # 👈 Incluido aquí para que sea una opción válida
-        ('tarjeta_credito', 'Con tarjeta de crédito'),
-        ('tarjeta_debito', 'Con tarjeta de débito'),
+class EnvioMensaje(models.Model):
+    METODOS_ENVIO_CHOICES = [
+        ('mqtt', 'MQTT (Descentralizado)'),
+        ('efectivo', 'Efectivo'),
+        ('websocket', 'WebSocket Seguro'),
+        ('webrtc', 'WebRTC P2P'),
         ('pago_internet', 'Pago vía Internet'),
         ('transferencia', 'Transferencia bancaria'),
     ]
 
-    id_venta = models.IntegerField(unique=True)
+    id_envio = models.IntegerField(unique=True)
     fecha = models.DateField()
     cant_cuotas = models.IntegerField()
     cantidad = models.IntegerField(default=1) 
-    metodo_pago = models.CharField(max_length=30, choices=METODOS_PAGO_CHOICES, default='contado')
-    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
-    empleado = models.ForeignKey('Empleado', on_delete=models.PROTECT)
-    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT)
+    metodo_envio = models.CharField(max_length=30, choices=METODOS_ENVIO_CHOICES, default='mqtt')
+    mensaje = models.ForeignKey(Mensaje, on_delete=models.PROTECT)
+    moderador = models.ForeignKey(Moderador, on_delete=models.PROTECT)
+    usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"Venta {self.id_venta} - {self.fecha}"
-    
-    # ❌ SE ELIMINARON LOS MÉTODOS clean() Y save() DE AQUÍ
+        # Corregido: String en una sola línea con salto explícito \n
+        return f"Envío {self.id_envio}\n{self.fecha}"

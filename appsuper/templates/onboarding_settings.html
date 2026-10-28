@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- PANTALLA ONBOARDING -->
+<div id="onboard" class="screen">
+  <img class="biglogo" id="lg1" alt="Logo">
+  <p class="tag" style="text-align:center">
+    Mensajería cifrada extremo a extremo. La clave sale de los números — no viaja. Solo viaja el mensaje cifrado.
+  </p>
+  
+  <label for="me">Tu número (con código de país)</label>
+  <input id="me" inputmode="numeric" placeholder="5491137824591" value="{{ request.user.usuario.dni|default:'' }}">
+  
+  <label for="meName">Tu nombre (así te ven los demás)</label>
+  <input id="meName" placeholder="Tu nombre" value="{{ request.user.usuario.nombre|default:'' }}">
+  
+  <label>Seguridad</label>
+  <div class="seg">
+    <button type="button" id="sOff" class="act" onclick="setSec(0)">🔓 Normal</button>
+    <button type="button" id="sOn" onclick="setSec(1)">🛡️ Blindado</button>
+  </div>
+  
+  <p class="tag">🛡️ Blindado: los mensajes se borran solos a los 45s y no se guardan en el teléfono.</p>
+  <button class="btn" style="margin-top:18px" onclick="saveMe()">Entrar</button>
+  <p class="tag" id="oerr" style="color:#e28"></p>
+</div>
+
+<!-- PANTALLA EDITAR PERFIL -->
+<div id="pEdit" class="screen" style="display:none;">
+  <header>
+    <button class="back" onclick="openProfile()" aria-label="Atrás">←</button>
+    <b>Editar Perfil</b>
+  </header>
+  <div class="prof">
+    <label for="meName2">Tu nombre / Alias</label>
+    <input id="meName2" placeholder="Agus" value="{{ request.user.usuario.nombre|default:'' }}">
+    
+    <label for="setNum">Tu número (con código de país)</label>
+    <input id="setNum" inputmode="numeric" value="{{ request.user.usuario.dni|default:'' }}">
+    
+    <label>Seguridad</label>
+    <div class="seg">
+      <button type="button" id="sOff2" onclick="setSec(0)">🔓 Normal</button>
+      <button type="button" id="sOn2" onclick="setSec(1)">🛡️ Blindado</button>
+    </div>
+    
+    <button class="btn" style="margin-top:16px" onclick="saveProfile()">Guardar 💾</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let SECURE = localStorage.getItem('sp_secure') === '1' ? 1 : 0;
+
+  function setSec(x) {
+    SECURE = x;
+    const off1 = document.getElementById('sOff'), on1 = document.getElementById('sOn');
+    const off2 = document.getElementById('sOff2'), on2 = document.getElementById('sOn2');
+    
+    if (off1 && on1) {
+      off1.classList.toggle('act', x === 0);
+      on1.classList.toggle('act', x === 1);
+    }
+    if (off2 && on2) {
+      off2.classList.toggle('act', x === 0);
+      on2.classList.toggle('act', x === 1);
+    }
+  }
+
+  function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+  }
+
+  function saveMe() {
+    const rawNum = document.getElementById('me').value;
+    const n = rawNum.replace(/\D/g, '');
+    const errEl = document.getElementById('oerr');
+
+    if (n.length < 6) {
+      if (errEl) errEl.textContent = 'Poné tu número completo con código de país.';
+      return;
+    }
+
+    const _nm = (document.getElementById('meName') ? document.getElementById('meName').value : '').trim();
+
+    // Persistir en Django vía POST
+    const formData = new FormData();
+    formData.append('dni', n);
+    formData.append('nombre', _nm);
+    formData.append('is_shielded', SECURE ? '1' : '0');
+
+    fetch("{% url 'save_profile' %}", {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrfToken() },
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        ME = n;
+        MYNAME = _nm;
+        localStorage.setItem('sp_me', ME);
+        localStorage.setItem('sp_secure', SECURE ? '1' : '0');
+        if (_nm) localStorage.setItem('sp_myname', _nm);
+        
+        if (typeof askNotif === 'function') askNotif();
+        if (typeof boot === 'function') boot();
+      } else {
+        if (errEl) errEl.textContent = data.message || 'Error al guardar.';
+      }
+    })
+    .catch(() => {
+      if (errEl) errEl.textContent = 'Error de conexión con el servidor.';
+    });
+  }
+
+  function saveProfile() {
+    const rawNum = document.getElementById('setNum').value;
+    const n = rawNum.replace(/\D/g, '');
+
+    if (n.length < 6) {
+      alert('Poné tu número completo con código de país.');
+      return;
+    }
+
+    const wasSecure = localStorage.getItem('sp_secure') === '1';
+    const _nm = (document.getElementById('meName2') ? document.getElementById('meName2').value : '').trim();
+
+    const formData = new FormData();
+    formData.append('dni', n);
+    formData.append('nombre', _nm);
+    formData.append('is_shielded', SECURE ? '1' : '0');
+
+    fetch("{% url 'save_profile' %}", {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrfToken() },
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        ME = n;
+        MYNAME = _nm;
+        localStorage.setItem('sp_me', ME);
+        localStorage.setItem('sp_secure', SECURE ? '1' : '0');
+        localStorage.setItem('sp_myname', _nm);
+
+        // Si se activa Modo Blindado, limpiamos mensajes guardados en el navegador
+        if (SECURE && !wasSecure) {
+          Object.keys(localStorage)
+            .filter(k => k.startsWith('sp_msgs_') || k.startsWith('sp_off_'))
+            .forEach(k => localStorage.removeItem(k));
+        }
+
+        location.reload();
+      }
+    });
+  }
+
+  // Inicialización de estado visual de seguridad al cargar
+  document.addEventListener('DOMContentLoaded', () => setSec(SECURE));
+</script>
+{% endblock %}

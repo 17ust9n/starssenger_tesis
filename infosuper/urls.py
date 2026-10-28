@@ -7,8 +7,8 @@ urlpatterns = [
     # Panel de administración por defecto de Django
     path('admin/', admin.site.urls),
     
-    # Conecta de forma global con todas las rutas que tenés escritas en tu appsuper
-    path('', include('appsuper.urls')),          
+    # Conecta de forma global con todas las rutas que tenés escritas en tu appseminario
+    path('', include('appseminario.urls')),          
 ]
 
 # Vincula la carpeta /media/ externa al sistema de rutas solo durante el desarrollo

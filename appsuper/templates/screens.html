@@ -1,0 +1,116 @@
+<!-- PANTALLA INICIO (HOME) -->
+<div id="home" class="screen">
+  <header>
+    <img class="logo" id="lg2" alt="Logo">
+    <span class="sp"></span>
+    <span class="dot" id="dot"></span>
+  </header>
+  <div class="searchwrap">
+    <input id="homeSearch" placeholder="Buscar…" oninput="renderList()">
+  </div>
+  <div id="list"></div>
+  <button id="fab" onclick="openNewChat()" title="Nuevo chat" aria-label="Nuevo chat">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+  </button>
+  <div class="tabs">
+    <button class="act" onclick="goHome()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6h-4v6H6v-9H3z"/></svg>Inicio</button>
+    <button onclick="openProfile()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6z"/></svg>Perfil</button>
+  </div>
+</div>
+
+<!-- NUEVO CHAT -->
+<div id="newchat" class="screen">
+  <header>
+    <button class="back" onclick="goHome()" aria-label="Atrás">←</button>
+    <b>Nuevo chat</b>
+  </header>
+  <div class="searchwrap">
+    <input id="ncSearch" placeholder="Buscar contacto…" oninput="renderNewChat()">
+  </div>
+  <div class="ncActions">
+    <button onclick="openAddContact()"><span class="ico">＋</span> Agregar contacto nuevo</button>
+    <button onclick="importToNew()"><span class="ico">📇</span> Buscar en mi agenda</button>
+    <button onclick="openNewGroup()"><span class="ico">👥</span> Nuevo grupo</button>
+    <button onclick="shareMyNumber()"><span class="ico">🔗</span> Compartir mi número (link)</button>
+  </div>
+  <div class="sectionh">Tus contactos</div>
+  <div id="ncList"></div>
+</div>
+
+<!-- PERFIL PRINCIPAL -->
+<div id="profile" class="screen">
+  <header><button class="back" onclick="goHome()" aria-label="Atrás">←</button><b>Perfil</b></header>
+  <div class="prof">
+    <div class="bigav" id="profAv">🙂</div>
+    <div class="pname" id="pName">—</div>
+    <div class="pnum" id="pNum"></div>
+    <div class="pbadge" id="pBadge">🔓 Modo Normal</div>
+    <div class="pkeybox" onclick="copyMyKey()">Clave Pública (Toca para copiar):<br><b id="pKey">…</b></div>
+    <div class="pmenu">
+      <button onclick="openPEdit()">✏️ Editar Perfil</button>
+      <button onclick="openPSettings()">⚙️ Ajustes y Seguridad</button>
+      <button onclick="openPCalls()">📞 Registro de llamadas</button>
+      <button onclick="openPAbout()">ℹ️ Acerca de Starssenger</button>
+      <button onclick="openPTerms()">📜 Términos y Condiciones</button>
+      <button class="logout" onclick="wipeApp()">Cerrar Sesión 🔒</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button onclick="goHome()"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6h-4v6H6v-9H3z"/></svg>Inicio</button>
+    <button class="act" onclick="openProfile()"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6z"/></svg>Perfil</button>
+  </div>
+</div>
+
+<!-- AJUSTES Y SEGURIDAD -->
+<div id="pSettings" class="screen">
+  <header><button class="back" onclick="openProfile()" aria-label="Atrás">←</button><b>Ajustes y Seguridad</b></header>
+  <div class="prof">
+    <label>Tildes de visto ✓✓</label>
+    <div class="seg">
+      <button id="tkCol" onclick="setTickColor(0)">De color</button>
+      <button id="tkBw" onclick="setTickColor(1)">Negras</button>
+    </div>
+    <p class="tag">El color del "visto" leído. Cada uno elige el suyo.</p>
+    <label style="margin-top:18px">Backup de contactos</label>
+    <div class="seg">
+      <button onclick="exportBackup()">⬆️ Copiar backup</button>
+      <button onclick="importBackup()">⬇️ Restaurar</button>
+    </div>
+    <div class="mrow" style="margin-top:18px;gap:8px">
+      <button class="btn ghost" onclick="resetApp()">🔄 Restablecer</button>
+      <button class="btn ghost" style="color:#e28;border-color:#e28" onclick="wipeApp()">🗑️ Borrar todo</button>
+    </div>
+    <p class="tag" id="verTag" style="margin-top:10px;opacity:.5"></p>
+  </div>
+</div>
+
+<!-- REGISTRO DE LLAMADAS -->
+<div id="pCalls" class="screen">
+  <header><button class="back" onclick="openProfile()" aria-label="Atrás">←</button><b>Registro de llamadas</b></header>
+  <div class="prof" id="callsBox"></div>
+</div>
+
+<!-- ACERCA DE -->
+<div id="pAbout" class="screen">
+  <header><button class="back" onclick="openProfile()" aria-label="Atrás">←</button><b>Acerca de</b></header>
+  <div class="prof">
+    <div class="aboutlogo"><svg viewBox="0 0 24 24" fill="#21C36F"><path d="M12 2L2 7l10 5 10-5-10-5zM2 12l10 5 10-5M2 17l10 5 10-5"/></svg></div>
+    <div class="abouttitle">Starssenger</div>
+    <div class="aboutver" id="aboutVer">Versión 1.0.0</div>
+    <div class="aboutdesc">Starssenger es una plataforma de mensajería segura orientada a garantizar la privacidad mediante algoritmos de cifrado avanzado.</div>
+    <div class="aboutcard">
+      <div class="ar"><span class="k">Servidor</span><span id="aboutSrv">Conectando…</span></div>
+      <div class="ar"><span class="k">Cifrado</span><span>Extremo a Extremo</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TÉRMINOS Y CONDICIONES -->
+<div id="pTerms" class="screen">
+  <header><button class="back" onclick="openProfile()" aria-label="Atrás">←</button><b>Términos y Condiciones</b></header>
+  <div class="prof terms">
+    <p class="tag"><b>Última actualización:</b> Septiembre 2026</p>
+    <h4>1. Aceptación de los Términos</h4>
+    <p>Al acceder y utilizar Starssenger, aceptas cumplir con estos Términos y Condiciones.</p>
+  </div>
+</div>
